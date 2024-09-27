@@ -7,8 +7,8 @@ document.addEventListener('keydown', keyEvent);
 function keyEvent(event) {
     if (event.key === ' ') {
         event.preventDefault();  // Prevents the default action of the spacebar
-        placeSingleBrick(0, 6, 'darkorange');
-        console.log("yup");
+        placeShape(shapes.O, 4, 4, 'darkorange');
+    
     }
     // Handle Arrow keys
     if (event.key === 'ArrowDown' || event.key === 's') {
@@ -20,7 +20,8 @@ function keyEvent(event) {
     } else if (event.key === 'ArrowRight' || event.key === 'd') {
         moveBrickRight(currentX, currentY); // Arrow Right or 'D'
     }else if(event.key === 'Space') {
-         placeSingleBrick(0,6, 'darkorange');
+        shape = currentShape;
+        placeShape(shape, 4, 4, 'red');
     }
 }
 
@@ -45,6 +46,26 @@ function usernameSent() {
 }
 
 let gameBoard = [];
+const shapes = {
+    I: [
+        [1, 1, 1, 1]
+    ],
+    L: [
+        [1, 0, 0],
+        [1, 1, 1]
+    ],
+    T: [
+        [0, 1, 0],
+        [1, 1, 1]
+    ],
+    O: [
+        [1, 1],
+        [1, 1]
+    ]
+};
+currentX = 3;
+currentY = 3;
+currentShape = shapes.O;
 
 function loadGame() {
     const gameBoardElement = document.getElementById('gameContent');
@@ -66,8 +87,7 @@ function loadGame() {
     }
 }
 
-currentX = 0;
-currentY = 6;
+
 
 // Exempel på hur man placerar en tegelsten i en specifik cell
 function placeSingleBrick(x, y, color) {
@@ -98,7 +118,7 @@ function moveBrickUp(x, y) {
         currentX = x;
         currentY = y;
         // Placera tegelstenen i den nya cellen
-        placeSingleBrick(x, y, 'darkorange');
+        placeShape(currentShape,x, y, 'darkorange');
     
 }
 }
@@ -114,7 +134,7 @@ function moveBrickDown(x, y) {
         currentX = x;
         currentY = y;
         // Placera tegelstenen i den nya cellen
-        placeSingleBrick(x, y, 'darkorange');
+        placeShape(currentShape,x, y, 'darkorange');
     }
 }
 function moveBrickLeft(x, y) {
@@ -128,7 +148,7 @@ function moveBrickLeft(x, y) {
         currentX = x;
         currentY = y;
         // Placera tegelstenen i den nya cellen
-        placeSingleBrick(x, y, 'darkorange');
+        placeShape(currentShape,x, y, 'darkorange');
     }
 }
 
@@ -143,7 +163,7 @@ function moveBrickRight(x, y) {
         x++;
         currentX = x;
         currentY = y;
-        placeSingleBrick(x, y, 'darkorange');
+        placeShape(currentShape,x, y, 'darkorange');
     }
 }
 
@@ -165,7 +185,23 @@ function checkIfOccupiedBox(x, y) {
 }
 
 
-// Starta rörelsen nedåt med ett intervall
+function placeShape(shape, startX, startY, color) {
+    shape.forEach((row, rowIndex) => {
+        row.forEach((cell, colIndex) => {
+            if (cell === 1) {
+                placeSingleBrick(startX + colIndex, startY + rowIndex, color);
+            }
+        });
+    });
+}
+
+
+
+
+function checkPlaceShape(){
+    
+}
+
 
 function testfuck(){
     placeSingleBrick(0,6, 'darkorange')
