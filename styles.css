@@ -56,14 +56,14 @@ body {
 
 #gameContent {
     display: grid;
-    grid-template-columns: repeat(8, 50px); 
-    grid-template-rows: repeat(8, 50px);    
+    grid-template-columns: repeat(9, 50px); 
+    grid-template-rows: repeat(9, 50px);    
     gap: 2px;
     background-color: #ddd;
 }
 
 .box {
-    background-color: #aaa;
+    background-color: rgb(170, 170, 170);
     border: 1px solid #333;
 }
 
