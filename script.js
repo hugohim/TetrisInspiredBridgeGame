@@ -3,15 +3,21 @@ document.getElementById("usernameBtn").addEventListener("click", usernameSent);
 
 document.addEventListener('keydown', keyEvent);
 
+let gameBoard = [];
+let spawnPoint = [];
+
 function keyEvent(event) {
     if (event.key === ' ') {
-        if (amountShapes>0) {
-            placeShape(currentShape,currentX,currentY,'blue')
+       if (amountShapes>0) {
+           placeShape(currentShape,currentX,currentY,'rgb(160, 82, 45)')
         }
+        amountShapes++;
         event.preventDefault();  // Prevents the default action of the spacebar
         randomShape();
-        placeShape(currentShape, 4, 4, 'darkorange');
-        amountShapes++;
+        if(!setSpawn()){
+            alert("Game Over! You lost the game.");
+        loadGame();
+        }
     }
     
     // Handle Arrow keys
@@ -23,10 +29,34 @@ function keyEvent(event) {
         moveBrickLeft(currentX, currentY); // Arrow Left or 'A'
     } else if (event.key === 'ArrowRight' || event.key === 'd') {
         moveBrickRight(currentX, currentY); // Arrow Right or 'D'
-    }else if(event.key === 'Space') {
-        shape = currentShape;
-        placeShape(shape, 4, 4, 'red');
+    } else if (event.key === 'e') {
+        rotateShapeRight();
     }
+}
+
+function spawnShapeLeftToRight(){
+    for (let index = 0; index < gameBoard.length; index++) {
+        for (let index2 = 0; index2 < gameBoard.at(index).length; index2++) {
+            if (safeToPlaceShape(currentShape,index2,index)) {
+                placeShape(currentShape, index2, index, 'darkorange');
+
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+function setSpawn(){
+    const randomX = Math.floor(Math.random() * 7) + 1;
+    const randomY = Math.floor(Math.random() * 7) +1;
+    spawnPoint[0] = randomX;
+    spawnPoint[1] = randomY;
+
+    //placeShape(shapes.o, randomX, randomY, 'darkgrey');
+    placeShape(currentShape, randomX, randomY, 'darkorange');
+    return true;
+
 }
 
 
@@ -50,10 +80,10 @@ function usernameSent() {
 }
 
 
-let gameBoard = [];
+
 const shapes = {
     I: [
-        [1, 1, 1, 1]
+        [1, 1, 1, 0]
     ],
     L: [
         [1, 0, 0],
@@ -64,6 +94,14 @@ const shapes = {
         [1, 1, 1]
     ],
     O: [
+        [1, 1],
+        [1, 0]
+    ],
+    x: [
+        [1,0],
+        [0,1]
+    ],
+    o:[
         [1, 1],
         [1, 1]
     ]
@@ -77,7 +115,9 @@ function loadGame() {
     const gameBoardElement = document.getElementById('gameContent');
     gameBoardElement.innerHTML = ''; // Rensa eventuellt befintligt innehåll
     gameBoard = []; // Nollställ gameBoard-arrayen
+    amountShapes = 0;
 
+    // Skapa spelplanen
     for (let row = 0; row < 9; row++) {
         for (let column = 0; column < 9; column++) {
             const box = document.createElement('div');
@@ -91,7 +131,21 @@ function loadGame() {
             gameBoardElement.appendChild(box); // Lägg till rutan i spelplanen
         }
     }
+
+    // Lägg till två gröna kuber på slumpmässiga positioner på vänster och höger sida
+    placeRandomGreenCubes();
 }
+
+function placeRandomGreenCubes() {
+    // Slumpa två positioner, en på vänster kolumn (x = 0) och en på höger kolumn (x = 8)
+    const leftRandomY = Math.floor(Math.random() * 9);
+    const rightRandomY = Math.floor(Math.random() * 9);
+    
+    // Placera de gröna kuberna på dessa positioner
+    placeSingleBrick(0, leftRandomY, 'green'); // Vänster kolumn
+    placeSingleBrick(8, rightRandomY, 'green'); // Höger kolumn
+}
+
 
 function randomShape() {
     // Create an array of shape keys
@@ -166,7 +220,6 @@ function testDrawRemovbe() {
 function placeShape(shape, startX, startY, color) {
     // First loop to check if placing is possible
     if(!safeToPlaceShape(shape,startX,startY)){
-        console.log("cant place there")
         return;
     }
     // If placing is possible, proceed with placing the bricks
@@ -184,9 +237,8 @@ function placeShape(shape, startX, startY, color) {
 
 // Exempel på hur man placerar en tegelsten i en specifik cell
 function placeSingleBrick(x, y, color) {
-    if (gameBoard[y] && gameBoard[y][x]) {
         gameBoard[y][x].style.backgroundColor = color;
-    }
+
 }
 
 
@@ -195,13 +247,11 @@ function safeToPlaceSingleBrick(x, y) {
     if (gameBoard[y] && gameBoard[y][x] && x >= 0 && x < 9 && y >= 0 && y < 9) {
         // Use getComputedStyle to get the actual applied background color
         const backgroundColor = window.getComputedStyle(gameBoard[y][x]).backgroundColor;
-        console.log('Computed background color:', backgroundColor); // Debug output
         
-        if (backgroundColor === 'rgb(170, 170, 170)' || backgroundColor === 'rgb(255, 140, 0)') {
+        if (backgroundColor === 'rgb(170, 170, 170)' || backgroundColor === 'rgb(255, 140, 0)' || backgroundColor === 'darkgrey' ) {
             return true;
         }
     }
-    console.log("Cannot place there");
     return false;
 }
 
@@ -218,6 +268,25 @@ function safeToPlaceShape(shape, startX, startY){
     }
     return true;
 }
+
+function rotateShapeRight() {
+    // Ta bort formen från sin nuvarande position
+    placeShape(currentShape, currentX, currentY, 'rgb(170, 170, 170)');
+
+    // Rotera formen 90 grader medurs
+    const rotatedShape = currentShape[0].map((_, index) => 
+        currentShape.map(row => row[index]).reverse()
+    );
+
+    // Kontrollera om rotationen är säker
+    if (safeToPlaceShape(rotatedShape, currentX, currentY)) {
+        currentShape = rotatedShape;  // Använd den roterade formen om det är säkert
+    }
+
+    // Placera den roterade formen på spelplanen
+    placeShape(currentShape, currentX, currentY, 'darkorange');
+}
+
 
 
 
